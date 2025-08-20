@@ -21,14 +21,31 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(app, origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"])
+# Enable CORS with env-driven origins (local + production)
+frontend_url = os.getenv("FRONTEND_URL")
+allowed_origins = {
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+}
+if frontend_url:
+    allowed_origins.add(frontend_url)
+
+# Allow Vercel preview and production domains
+vercel_pattern = r"https://.*\.vercel\.app"
+
+CORS(app, resources={
+    r"/*": {
+        "origins": list(allowed_origins) + [vercel_pattern]
+    }
+})
 
 # Mengambil API Key dari variabel lingkungan
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 MODEL_NAME = "deepseek/deepseek-r1-distill-llama-70b:free"
-SITE_URL = "http://localhost:5000"
-SITE_NAME = "HIMASIF AI Assistant"
+SITE_URL = os.getenv("SITE_URL", "http://localhost:5000")
+SITE_NAME = os.getenv("SITE_NAME", "HIMASIF AI Assistant")
 TIMEOUT = 30
 
 # Log API key status (without exposing the actual key)
