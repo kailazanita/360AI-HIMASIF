@@ -13,6 +13,16 @@
   src: url(../assets/fonts/Ubuntu/Ubuntu-Regular.ttf);
 }
 
+@font-face {
+  font-family: "Ubuntu Italic";
+  src: url(../assets/fonts/Ubuntu/Ubuntu-Italic.ttf);
+}
+
+@font-face {
+  font-family: "Ubuntu Bold";
+  src: url(../assets/fonts/Ubuntu/Ubuntu-Bold.ttf);
+}
+
 /* Chat Page - Modern Gradient Design matching HomePage */
 .chat-page {
   height: 100vh;
@@ -39,7 +49,7 @@
       transparent 100%
     ),
     radial-gradient(
-      300px 300px at calc(100% + 150px) 50%,
+      800px 800px at calc(100% + 150px) 50%,
       rgba(6, 182, 212, 0.6) 0%,
       rgba(14, 116, 144, 0.3) 50%,
       transparent 100%
@@ -77,7 +87,6 @@
   background: #121216;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 15px 0px;
-  padding-top: 15px;
   position: fixed;
 }
 
@@ -126,7 +135,7 @@
 }
 
 .home-button:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -237,7 +246,8 @@
   flex-direction: column;
   gap: 1.5rem;
   scroll-behavior: smooth;
-  margin: 100px 0;
+  margin-top: 90px;
+  margin-bottom: 100px;
 }
 
 /* Custom scrollbar */
@@ -262,7 +272,6 @@
 /* Messages - Glassmorphism style */
 .message {
   display: flex;
-  margin-bottom: 1rem;
   animation: fadeInUp 0.3s ease-out;
 }
 
@@ -280,7 +289,7 @@
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #45A7C4 10%, #173B3C 100%);
+  background: #173B3C;
   color: #ffffff;
   border-radius: 1.25rem 1.25rem 0.5rem 1.25rem;
   padding: 1rem 1.25rem;
@@ -320,6 +329,65 @@
 
 .message.bot .message-time {
   text-align: left;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.italic-text {
+  font-style: italic;
+}
+
+.inline-code {
+  font-family: monospace;
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.code-block {
+  background-color: #f4f4f4;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: monospace;
+}
+
+.underline-text {
+  text-decoration: underline;
+}
+
+.strike-text {
+  text-decoration: line-through;
+}
+
+.highlight-text {
+  background-color: yellow;
+}
+
+.greeting {
+  font-family: 'Ubuntu Italic';
+}
+
+.gratitude {
+  font-family: 'Ubuntu Italic';
+}
+
+.himasif {
+  font-family: 'Ubuntu Bold';
+}
+
+.tagline {
+  font-family: 'Ubuntu Italic';
+}
+
+.number {
+  font-family: 'Ubuntu Italic';
+}
+
+.tech {
+  font-family: 'Ubuntu Bold';
 }
 
 /* Message Footer with Actions */
@@ -367,13 +435,12 @@
 }
 
 .copy-button.copied {
-  background: linear-gradient(135deg, #5C9DAD 0%, #29616C 100%);
+  background: #173B3C;
   color: #ffffff;
-  border-color: #10b981;
 }
 
 .copy-button.copied:hover {
-  background: linear-gradient(135deg, #45A7C4 0%, #5C9DAD 100%);
+  background: #29616C;
 }
 
 /* Share Container */
@@ -651,6 +718,7 @@
   .messages-container {
     padding: 1rem;
     gap: 1rem;
+    height: calc(100vh - 228px);
   }
 
   .message-content {
@@ -785,4 +853,31 @@ body.light .home-button{
 body.light .status-indicator {
   border: 1px solid rgba(0, 0, 0, 0.2);
   color: #4b5563;
+}
+
+body.light .action-button {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #4b5563;
+}
+
+body.light .share-menu {
+  background: #f9fafb;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+body.light .share-menu-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  color: #4b5563;
+}
+
+body.light .share-option {
+  color: #4b5563;
+}
+
+body.light .message-input::placeholder {
+  color: #4b5563;
+}
+
+body.light .typing-indicator span {
+  background: rgba(0, 0, 0, 0.6);
 }
