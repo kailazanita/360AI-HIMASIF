@@ -13,6 +13,16 @@
   src: url(../assets/fonts/Ubuntu/Ubuntu-Regular.ttf);
 }
 
+@font-face {
+  font-family: "Ubuntu Italic";
+  src: url(../assets/fonts/Ubuntu/Ubuntu-Italic.ttf);
+}
+
+@font-face {
+  font-family: "Ubuntu Bold";
+  src: url(../assets/fonts/Ubuntu/Ubuntu-Bold.ttf);
+}
+
 /* Chat Page - Modern Gradient Design matching HomePage */
 .chat-page {
   height: 100vh;
@@ -354,6 +364,30 @@
 
 .highlight-text {
   background-color: yellow;
+}
+
+.greeting {
+  font-family: 'Ubuntu Italic';
+}
+
+.gratitude {
+  font-family: 'Ubuntu Italic';
+}
+
+.himasif {
+  font-family: 'Ubuntu Bold';
+}
+
+.tagline {
+  font-family: 'Ubuntu Italic';
+}
+
+.number {
+  font-family: 'Ubuntu Italic';
+}
+
+.tech {
+  font-family: 'Ubuntu Bold';
 }
 
 /* Message Footer with Actions */

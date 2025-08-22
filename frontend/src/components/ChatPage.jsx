@@ -195,12 +195,15 @@ Silakan ketik pertanyaan Anda.`,
       'bug': 'bug 🐛',
       'fixed': 'fixed ✅',
       'loading': 'loading ⏳',
-      'data': 'data 📊'
+      'data': 'data 📊',
+      'himasif': '<span class="himasif">HIMASIF</span>',
+      'we make it happen': '<span class="tagline">We Make It Happen</span>'
     }
     
     // Auto add emojis untuk kata-kata bahasa Inggris dengan styling lebih fancy
     const emojiMappingEN = {
       'hello': '<span class="greeting">Hello 👋✨</span>',
+      'halo': '<span class="greeting">Halo ✨</span>',
       'hi': '<span class="greeting">Hi 👋😊</span>',
       'thanks': '<span class="gratitude">Thanks 🙏💖</span>',
       'thank you': '<span class="gratitude">Thank you 🙏💖</span>',
