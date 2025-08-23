@@ -113,7 +113,7 @@ Untuk pengalaman AI yang lebih pintar seperti ChatGPT:
 
 1. **Edit file `.env`** (file .env di folder backend):
    ```
-   OPENROUTER_API_KEY=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
+   OPENROUTER_API_KEY=your-api-key
    ```
 2. **Restart backend server**
 
@@ -228,10 +228,6 @@ Knowledge base mencakup:
 3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open Pull Request
-
-## 📄 License
-
-Distributed under the MIT License.
 
 ## 👥 Team
 
