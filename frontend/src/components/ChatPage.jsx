@@ -2,560 +2,375 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import Toast from "./Toast"
+import { signInWithPopup, signOut } from "firebase/auth"
+// Toast component removed; keep a no-op fallback for notifications
+import Sidebar from "./Sidebar"
 import "./ChatPage.css"
-import ThemeToggle from "./ThemeToggle"
+import Header from "./Header"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-//import image
-import logo from "../assets/images/himasif.png"
-import { faTelegram, faTwitter, faWhatsapp, faXTwitter } from "@fortawesome/free-brands-svg-icons"
-import { faCopy, faLink, faX } from "@fortawesome/free-solid-svg-icons"
+import {
+  faPaperPlane,
+  faArrowDown,
+  faComments,
+  faHouse,
+  faCalendarDays,
+  faFolderOpen,
+  faAddressBook,
+  faCopy,
+  faShareNodes,
+  faDownload,
+} from "@fortawesome/free-solid-svg-icons"
+import { auth, googleProvider } from "../lib/firebase"
 
 function ChatPage() {
   const location = useLocation()
   const navigate = useNavigate()
+
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [connectionStatus, setConnectionStatus] = useState("connected")
-  const [copiedMessageId, setCopiedMessageId] = useState(null)
-  const [showShareMenu, setShowShareMenu] = useState(null)
-  const [toast, setToast] = useState({ isVisible: false, message: "", type: "success" })
-  const [hasProcessedInitialQuery, setHasProcessedInitialQuery] = useState(false) // TAMBAHAN: flag untuk mencegah double processing
-  const messagesEndRef = useRef(null)
+  const [copiedId, setCopiedId] = useState(null)
+  // toast state removed (Toast component deleted)
+  const [hasProcessedInitialQuery, setHasProcessedInitialQuery] = useState(false)
+  const [user, setUser] = useState(null)
+  const [showScrollDown, setShowScrollDown] = useState(false)
+
+  const navItems = [
+    { label: "Beranda", icon: faHouse },
+    { label: "Agenda", icon: faCalendarDays },
+    { label: "Dokumen", icon: faFolderOpen },
+    { label: "Kontak", icon: faAddressBook },
+  ]
+
   const inputRef = useRef(null)
-  const initialQueryRef = useRef(null) 
-  const chatContainerRef = useRef(null);
-  const messageContainerRef = useRef(null);
-  
+  const messageContainerRef = useRef(null)
 
-  // Handle initial query from homepage - FIXED PROPERLY
-  useEffect(() => {
-    if (location.state?.initialQuery && !hasProcessedInitialQuery) {
-      initialQueryRef.current = location.state.initialQuery
-      setHasProcessedInitialQuery(true)
-    } else if (!location.state?.initialQuery && !hasProcessedInitialQuery) {
-      // Add welcome message if no initial query
-      setMessages([
-        {
-          id: 1,
-          text: `Halo! Saya adalah **360 AI**, asisten cerdas HIMASIF yang siap membantu Anda.
+  const resizeInput = () => {
+    if (!inputRef.current) return
+    const el = inputRef.current
+    el.style.height = "auto"
+    const nextHeight = Math.min(el.scrollHeight, 220)
+    el.style.height = `${nextHeight}px`
+  }
 
-**Apa yang bisa saya bantu?**
-• Informasi HIMASIF - struktur, kegiatan, pengurus
-• Programming & teknologi - coding, web development, AI
-• Akademik - tugas, penelitian, belajar
-• Pertanyaan umum - apapun yang ingin Anda ketahui
-
-Silakan ketik pertanyaan Anda.`,
-          sender: "bot",
-          timestamp: new Date(),
-        },
-      ])
-      setHasProcessedInitialQuery(true)
-    }
-  }, [location.state?.initialQuery, hasProcessedInitialQuery])
-
-  // Separate effect untuk send initial query setelah sendMessage ready
-  useEffect(() => {
-    if (initialQueryRef.current && hasProcessedInitialQuery) {
-      const queryToSend = initialQueryRef.current
-      initialQueryRef.current = null // Clear ref
-      sendMessage(queryToSend)
-    }
-  }, [hasProcessedInitialQuery])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
-    if (messageContainerRef.current) {
-      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
-    }
-  };  
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);  
+  const handleLogoClick = () => navigate("/")
 
   const sendMessage = async (messageText = inputMessage) => {
-    const textToSend = messageText.trim()
-    if (!textToSend || isLoading) return // Cek apakah sedang loading dan pastikan pesan tidak kosong
+    if (!messageText.trim() || isLoading) return
+
+    const trimmed = messageText.trim()
 
     const userMessage = {
       id: Date.now(),
-      text: textToSend,
+      text: trimmed,
       sender: "user",
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
-    setInputMessage("") // Clear input setelah mengirim
-    inputRef.current?.focus()
+    const newMessages = [...messages, userMessage]
+    setMessages(newMessages)
+    setInputMessage("")
     setIsLoading(true)
 
+    if (inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.style.height = "auto"
+    }
+
     try {
-      const response = await fetch(`${(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')}/chat`, {
+      const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: textToSend }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: trimmed }),
       })
 
       if (!response.ok) {
-        throw new Error("Network response was not ok")
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
+      let botText = data.response || "Maaf, terjadi kesalahan."
+      // Tambahkan quick follow-up suggestions jika ada (hanya jika bukan error)
+      if (data.suggestions && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+        botText += `<br/><br/><span class='bot-suggest-label'>Coba tanyakan juga:</span><br/>` +
+          data.suggestions.map(q => `• ${q}`).join('<br/>')
+      }
       const botMessage = {
         id: Date.now() + 1,
-        text: data.response,
+        text: botText,
         sender: "bot",
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       }
-
-      setMessages((prev) => [...prev, botMessage])
-      setConnectionStatus("connected")
+      const finalMessages = [...newMessages, botMessage]
+      setMessages(finalMessages)
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Chat error:", error)
       const errorMessage = {
         id: Date.now() + 1,
-        text: "Maaf, terjadi kesalahan dalam menghubungi server. Silakan coba lagi.",
+        text: "Maaf, saya tidak bisa terhubung ke server. Silakan coba lagi.",
         sender: "bot",
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       }
-      setMessages((prev) => [...prev, errorMessage])
-      setConnectionStatus("disconnected")
+      const finalMessages = [...newMessages, errorMessage]
+      setMessages(finalMessages)
     } finally {
-      setIsLoading(false) // Pastikan status loading diubah setelah proses selesai
+      setIsLoading(false)
     }
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault() // Mencegah enter menambahkan line baru
-      if (!isLoading && inputMessage.trim()) { // Pastikan ada text dan tidak loading
-        sendMessage()
+  const formatMessage = (text, isBot = false) => {
+    let formatted = text
+
+    // Remove emoji for bot responses
+    if (isBot) {
+      try {
+        formatted = formatted.replace(/\p{Emoji_Presentation}|\p{Emoji}/gu, "")
+      } catch (e) {
+        // fallback for environments without Unicode emoji property support
+        formatted = formatted.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}]/gu, "")
       }
     }
-  }
 
-  const formatMessage = (text) => {
-    let formattedText = text
-    
-    // Code blocks: ```code``` -> <pre><code>code</code></pre>
-    formattedText = formattedText.replace(/```([\s\S]*?)```/g, '<pre class="code-block"><code>$1</code></pre>')
-    
-    // Code inline: `code` -> <code>code</code>
-    formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-    
-    // Bold text: **text** -> <strong>text</strong>
-    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong class="bold-text">$1</strong>')
-    
-    // Italic text: *text* -> <em>text</em>
-    formattedText = formattedText.replace(/\*((?!\*)(.*?)(?!\*))\*/g, '<em class="italic-text">$1</em>')
-    
-    // Underline: __text__ -> <u>text</u>
-    formattedText = formattedText.replace(/__(.*?)__/g, '<u class="underline-text">$1</u>')
-    
-    // Strike through: ~~text~~ -> <del>text</del>
-    formattedText = formattedText.replace(/~~(.*?)~~/g, '<del class="strike-text">$1</del>')
-    
-    // Highlight: ==text== -> <mark>text</mark>
-    formattedText = formattedText.replace(/==(.*?)==/g, '<mark class="highlight-text">$1</mark>')
-    
-    // Auto add emojis untuk kata-kata tertentu (bahasa Indonesia)
-    const emojiMappingID = {
-      'halo': 'halo 👋',
-      'hai': 'hai 👋',
-      'terima kasih': 'terima kasih 🙏',
-      'makasih': 'makasih 🙏',
-      'selamat': 'selamat 🎉',
-      'bagus': 'bagus 👍',
-      'keren': 'keren 🔥',
-      'mantap': 'mantap 💯',
-      'programming': 'programming 💻',
-      'coding': 'coding 👨‍💻',
-      'website': 'website 🌐',
-      'aplikasi': 'aplikasi 📱',
-      'database': 'database 🗄️',
-      'ai': 'AI 🤖',
-      'machine learning': 'machine learning 🧠',
-      'himasif': 'HIMASIF 🎓',
-      'universitas': 'universitas 🏫',
-      'kuliah': 'kuliah 📚',
-      'tugas': 'tugas 📝',
-      'ujian': 'ujian ✍️',
-      'lulus': 'lulus 🎓',
-      'berhasil': 'berhasil ✅',
-      'sukses': 'sukses 🌟',
-      'error': 'error ❌',
-      'bug': 'bug 🐛',
-      'fixed': 'fixed ✅',
-      'loading': 'loading ⏳',
-      'data': 'data 📊',
-      'himasif': '<span class="himasif">HIMASIF</span>',
-      'we make it happen': '<span class="tagline">We Make It Happen</span>'
-    }
-    
-    // Auto add emojis untuk kata-kata bahasa Inggris dengan styling lebih fancy
-    const emojiMappingEN = {
-      'hello': '<span class="greeting">Hello 👋✨</span>',
-      'halo': '<span class="greeting">Halo ✨</span>',
-      'hi': '<span class="greeting">Hi 👋😊</span>',
-      'thanks': '<span class="gratitude">Thanks 🙏💖</span>',
-      'thank you': '<span class="gratitude">Thank you 🙏💖</span>',
-      'awesome': '<span class="positive">Awesome 🚀⭐</span>',
-      'amazing': '<span class="positive">Amazing 🤩✨</span>',
-      'great': '<span class="positive">Great 👌🔥</span>',
-      'excellent': '<span class="positive">Excellent 💯🌟</span>',
-      'perfect': '<span class="positive">Perfect 💎✨</span>',
-      'wonderful': '<span class="positive">Wonderful 🌈💫</span>',
-      'fantastic': '<span class="positive">Fantastic 🎆🚀</span>',
-      'cool': '<span class="positive">Cool 😎❄️</span>',
-      'nice': '<span class="positive">Nice 👌😊</span>',
-      'programming': '<span class="tech">Programming 💻⚡</span>',
-      'coding': '<span class="tech">Coding 👨‍💻🔥</span>',
-      'javascript': '<span class="tech">JavaScript 🟨⚡</span>',
-      'python': '<span class="tech">Python 🐍💚</span>',
-      'react': '<span class="tech">React ⚛️💙</span>',
-      'nodejs': '<span class="tech">Node.js 🟢⚡</span>',
-      'database': '<span class="tech">Database 🗄️📊</span>',
-      'api': '<span class="tech">API 🔌🌐</span>',
-      'website': '<span class="tech">Website 🌐✨</span>',
-      'app': '<span class="tech">App 📱🚀</span>',
-      'application': '<span class="tech">Application 📱💻</span>',
-      'ai': '<span class="ai-text">AI 🤖🧠</span>',
-      'artificial intelligence': '<span class="ai-text">Artificial Intelligence 🤖🧠✨</span>',
-      'machine learning': '<span class="ai-text">Machine Learning 🧠📊</span>',
-      'deep learning': '<span class="ai-text">Deep Learning 🧠🔥</span>',
-      'success': '<span class="success">Success ✅🎉</span>',
-      'completed': '<span class="success">Completed ✅💯</span>',
-      'done': '<span class="success">Done ✅😊</span>',
-      'finished': '<span class="success">Finished 🏁✨</span>',
-      'error': '<span class="error">Error ❌🚨</span>',
-      'bug': '<span class="error">Bug 🐛⚠️</span>',
-      'problem': '<span class="error">Problem ⚠️🔧</span>',
-      'issue': '<span class="error">Issue ⚠️📋</span>',
-      'loading': '<span class="loading">Loading ⏳🔄</span>',
-      'processing': '<span class="loading">Processing ⚙️⏳</span>',
-      'working': '<span class="loading">Working 🔧⚡</span>'
-    }
-    
-    // Apply Indonesian emoji mappings (simple replacement)
-    Object.entries(emojiMappingID).forEach(([word, replacement]) => {
-      const regex = new RegExp(`\\b${word}\\b`, 'gi')
-      formattedText = formattedText.replace(regex, replacement)
+    // Preserve code blocks first
+    const codeBlocks = []
+    formatted = formatted.replace(/```([\s\S]*?)```/g, (m, code) => {
+      const idx = codeBlocks.push(code.trim()) - 1
+      return `{{CODEBLOCK_${idx}}}`
     })
-    
-    // Apply English emoji mappings (with styling)
-    Object.entries(emojiMappingEN).forEach(([word, replacement]) => {
-      const regex = new RegExp(`\\b${word}\\b`, 'gi')
-      formattedText = formattedText.replace(regex, replacement)
+
+    // Simple markdown -> HTML for bold/italic
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, (m, p1) => `<strong>${p1}</strong>`)
+    formatted = formatted.replace(/\*(.*?)\*/g, (m, p1) => `<em>${p1}</em>`)
+
+    // Normalize newlines then convert to <br/>
+    formatted = formatted.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
+    formatted = formatted.replace(/\n/g, "<br/>")
+
+    // Remove accidental leading dots at start of lines for bot messages (e.g. ". Judul")
+    if (isBot) {
+      formatted = formatted.replace(/(^|<br\/?>)\s*\.{1,}\s*/g, "$1")
+    }
+
+    if (isBot) {
+      // Ensure first visible line becomes the bot header
+      const firstBreakIdx = formatted.indexOf('<br/>')
+      if (firstBreakIdx === -1) {
+        // single line -> entire line is header
+        formatted = `<span class='bot-header'>${formatted.trim()}</span>`
+      } else {
+        const header = formatted.slice(0, firstBreakIdx).trim()
+        const rest = formatted.slice(firstBreakIdx + 5).trim()
+        formatted = `<span class='bot-header'>${header}</span>${rest ? '<br/>' + rest : ''}`
+      }
+
+      // Section headers: lines that start with ". " or "## "
+      formatted = formatted.replace(/(?:<br\/?>)\s*(?:\.\s*|##\s*)([^<\n]+)(?=<br|$)/g, (m, title) =>
+        `<br/><span class='bot-section-header'>${title.trim()}</span>`
+      )
+
+      // Callout lines: start with "Note:" or "Catatan:" or prefixed with "> "
+      formatted = formatted.replace(/(?:<br\/?>)\s*(?:Note:|Catatan:)\s*([^<\n]+)(?=<br|$)/g, (m, note) =>
+        `<br/><div class='bot-callout'>${note.trim()}</div>`
+      )
+      formatted = formatted.replace(/(?:<br\/?>)\s*>\s*([^<\n]+)(?=<br|$)/g, (m, note) =>
+        `<br/><div class='bot-callout'>${note.trim()}</div>`
+      )
+
+      // List header lines like "- Title:" -> styled
+      formatted = formatted.replace(/(?:<br\/?>)\s*-\s*([^:]+:)/g, (m, listHeader) =>
+        `<br/><span class='bot-list-header'>• ${listHeader.replace(/^-\s*/, '').trim()}</span>`
+      )
+
+      // Convert remaining dash bullets to dots
+      formatted = formatted.replace(/(?:<br\/?>)\s*-\s+/g, '<br/>• ')
+
+      // Keep strong tags but allow CSS to style them for bot visuals
+      formatted = formatted.replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>')
+    }
+
+    // restore code blocks
+    formatted = formatted.replace(/\{\{CODEBLOCK_(\d+)\}\}/g, (m, idx) => {
+      const code = codeBlocks[Number(idx)] || ''
+      return `<pre><code>${code}</code></pre>`
     })
-    
-    // Convert line breaks
-    formattedText = formattedText.replace(/\n/g, '<br>')
-    
-    // Add special effects for certain patterns
-    // Numbers with special styling
-    formattedText = formattedText.replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-    
-    // URLs with link styling (basic detection)
-    formattedText = formattedText.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="link">$1 🔗</a>')
-    
-    // Email addresses
-    formattedText = formattedText.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1" class="email">$1 📧</a>')
-    
-    return formattedText
+
+    // Defensive: remove any remaining single dot or bullet before bot spans
+    if (isBot) {
+      // Remove dot or bullet at start of string before bot spans
+      formatted = formatted.replace(/^\s*[\.\u2022]\s*(?=<span class='bot-)/, '')
+      // Remove dot or bullet immediately before bot spans after line breaks
+      formatted = formatted.replace(/(?:<br\/?>)\s*[\.\u2022]\s*(?=<span class='bot-)/g, '<br/>')
+    }
+
+    return formatted
   }
 
-  const goHome = () => {
-    navigate("/")
+  // fallback no-op toast to avoid errors where showToast is called
+  const showToast = (message, type) => {
+    // console fallback; UI toast was removed
+    console.info("toast:", type, message)
   }
 
-  // Show toast notification
-  const showToast = (message, type = "success") => {
-    setToast({ isVisible: true, message, type })
+  const copyMessage = (text, id) => {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 1500)
   }
 
-  const hideToast = () => {
-    setToast((prev) => ({ ...prev, isVisible: false }))
+  const shareMessage = (text) => {
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {})
+      return
+    }
+    navigator.clipboard.writeText(text)
   }
 
-  // Copy message to clipboard
-  const copyMessage = async (messageText, messageId) => {
+  const downloadMessage = (text, id) => {
+    const blob = new Blob([text], { type: "text/plain" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `chat-${id}.txt`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleNewChat = () => {
+    setMessages([])
+    setInputMessage("")
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto"
+    }
+  }
+
+  const handleSignIn = async () => {
     try {
-      await navigator.clipboard.writeText(messageText)
-      setCopiedMessageId(messageId)
-      showToast("✅ Response copied to clipboard!", "success")
-      setTimeout(() => setCopiedMessageId(null), 2000)
-    } catch (err) {
-      console.error("Failed to copy text: ", err)
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea")
-      textArea.value = messageText
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand("copy")
-      document.body.removeChild(textArea)
-      setCopiedMessageId(messageId)
-      showToast("✅ Response copied to clipboard!", "success")
-      setTimeout(() => setCopiedMessageId(null), 2000)
+      const result = await signInWithPopup(auth, googleProvider)
+      setUser(result.user)
+      showToast("Berhasil masuk dengan Google", "success")
+    } catch (error) {
+      console.error("Google sign-in error:", error)
+      showToast("Gagal masuk, coba lagi", "error")
     }
   }
 
-  // Share message - FIXED VERSION
-  const shareMessage = async (messageText, messageId, platform) => {
-    const shareText = `💬 360 AI Response:\n\n${messageText}\n\n🤖 Powered by HIMASIF UPJ`
-    const shareUrl = window.location.href
-    setShowShareMenu(null)
-
-    switch (platform) {
-      case "whatsapp":
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank")
-        break
-      case "telegram":
-        window.open(
-          `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-          "_blank",
-        )
-        break
-      case "twitter":
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-          "_blank",
-        )
-        break
-      case "copy-link":
-        const linkText = `${shareText}\n\n🔗 Link: ${shareUrl}`
-        await copyMessage(linkText, messageId)
-        showToast("🔗 Link copied with response!", "success")
-        break
-      default:
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: "360 AI Response",
-              text: shareText,
-              url: shareUrl,
-            })
-          } catch (err) {
-            console.log("Share cancelled")
-          }
-        }
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth)
+      setUser(null)
+      showToast("Berhasil keluar", "success")
+    } catch (error) {
+      console.error("Sign-out error:", error)
+      showToast("Gagal keluar, coba lagi", "error")
     }
   }
 
-  // Close share menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setShowShareMenu(null)
-    if (showShareMenu) {
-      document.addEventListener("click", handleClickOutside)
-      return () => document.removeEventListener("click", handleClickOutside)
+    if (location.state?.initialQuery && !hasProcessedInitialQuery) {
+      const initial = location.state.initialQuery.trim()
+      setInputMessage(initial)
+      sendMessage(initial)
+      setHasProcessedInitialQuery(true)
+      window.history.replaceState({}, document.title)
     }
-  }, [showShareMenu])
+  }, [location, hasProcessedInitialQuery])
+
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight
+    }
+  }, [messages])
+
+  // Show/hide scroll down button
+  useEffect(() => {
+    const container = messageContainerRef.current
+    if (!container) return
+    const handleScroll = () => {
+      // Show button if not at bottom (allow 40px tolerance)
+      setShowScrollDown(
+        container.scrollHeight - container.scrollTop - container.clientHeight > 40
+      )
+    }
+    container.addEventListener("scroll", handleScroll)
+    return () => container.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  const scrollToBottom = () => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTo({
+        top: messageContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      })
+    }
+  }
+
+  useEffect(() => {
+    resizeInput()
+  }, [inputMessage])
 
   return (
     <div className="chat-page">
-      {/* Toast Notification */}
-      <Toast message={toast.message} type={toast.type} isVisible={toast.isVisible} onClose={hideToast} />
+      <Sidebar
+        onNewChat={handleNewChat}
+        navItems={navItems}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
+        user={user}
+        onLogoClick={handleLogoClick}
+      />
 
-      {/* Header */}
-      <header className="chat-header">
-        <div className="chat-header-content">
-          <div className="logo-section">
-            <button onClick={goHome} className="home-button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9 22V12H15V22"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <div className="logo">
-              <div className="nav-brand">
-                <img src={logo || "/placeholder.svg"} alt="Logo HIMASIF" className="nav-logo" />
-                <span className="nav-title">360 AI</span>
-              </div>
-            </div>
-          </div>
-          <div className="connection-status">
-            <ThemeToggle />
-            <div className={`status-indicator ${connectionStatus}`}>
-              <div className="status-dot"></div>
-              <span className="status-text">{connectionStatus === "connected" ? "Online" : "Offline"}</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Chat Container */}
-      <main className="chat-container">
+      {/* MAIN CHAT */}
+      <Header />
+      <div className="chat-main">
+        {/* MESSAGES */}
         <div className="messages-container" ref={messageContainerRef}>
-          {messages.map((message) => (
-            <div key={message.id} className={`message ${message.sender}`}>
-              <div className="message-content">
-                <div className="message-text" dangerouslySetInnerHTML={{ __html: formatMessage(message.text) }} />
-                <div className="message-footer">
-                  <div className="message-time">
-                    {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                  {/* Copy & Share buttons for bot messages */}
-                  {message.sender === "bot" && (
+          {messages.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <FontAwesomeIcon icon={faComments} />
+              </div>
+              <h3>Mulai Percakapan</h3>
+              <p>Tanyakan apapun tentang HIMASIF, dan AI saya akan siap membantu!</p>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className={`message ${msg.sender}`}>
+                <div className="message-content">
+                  <div
+                    className="message-text"
+                    dangerouslySetInnerHTML={{ __html: formatMessage(msg.text, msg.sender === 'bot') }}
+                  />
+                  {/* waktu dihapus sesuai permintaan */}
+                  {msg.sender === "bot" && (
                     <div className="message-actions">
-                      <button
-                        className={`action-button copy-button ${copiedMessageId === message.id ? "copied" : ""}`}
-                        onClick={() => copyMessage(message.text, message.id)}
-                        title={copiedMessageId === message.id ? "Copied!" : "Copy response"}
-                      >
-                        {copiedMessageId === message.id ? (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path
-                              d="M20 6L9 17L4 12"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path
-                              d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <rect
-                              x="8"
-                              y="2"
-                              width="8"
-                              height="4"
-                              rx="1"
-                              ry="1"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
+                      <button className="action-btn" onClick={() => shareMessage(msg.text)} aria-label="Bagikan">
+                        <FontAwesomeIcon icon={faShareNodes} />
+                        <span className="action-tooltip">Share</span>
                       </button>
-                      <div className="share-container">
-                        <button
-                          className="action-button share-button"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setShowShareMenu(showShareMenu === message.id ? null : message.id)
-                          }}
-                          title="Share response"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path
-                              d="M4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <polyline
-                              points="16,6 12,2 8,6"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <line
-                              x1="12"
-                              y1="2"
-                              x2="12"
-                              y2="15"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                        {/* Share Menu */}
-                        {showShareMenu === message.id && (
-                          <div
-                            className="share-menu"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                            }}
-                          >
-                            <div className="share-menu-header">
-                              <span>Share Response</span>
-                            </div>
-                            <div className="share-options">
-                              <button
-                                className="share-option"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  shareMessage(message.text, message.id, "whatsapp")
-                                }}
-                              >
-                                <span className="share-icon"><FontAwesomeIcon icon={faWhatsapp} /></span>
-                                <span>WhatsApp</span>
-                              </button>
-                              <button
-                                className="share-option"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  shareMessage(message.text, message.id, "telegram")
-                                }}
-                              >
-                                <span className="share-icon"><FontAwesomeIcon icon={faTelegram} /></span>
-                                <span>Telegram</span>
-                              </button>
-                              <button
-                                className="share-option"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  shareMessage(message.text, message.id, "twitter")
-                                }}
-                              >
-                                <span className="share-icon"><FontAwesomeIcon icon={faXTwitter} /></span>
-                                <span>X</span>
-                              </button>
-                              <button
-                                className="share-option"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  shareMessage(message.text, message.id, "copy-link")
-                                }}
-                              >
-                                <span className="share-icon"><FontAwesomeIcon icon={faLink} /></span>
-                                <span>Copy Link</span>
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <button
+                        className="action-btn"
+                        onClick={() => copyMessage(msg.text, msg.id)}
+                        aria-label="Salin"
+                      >
+                        <FontAwesomeIcon icon={faCopy} />
+                        <span className="action-tooltip">{copiedId === msg.id ? "Berhasil" : "Copy"}</span>
+                      </button>
+                      <button
+                        className="action-btn"
+                        onClick={() => downloadMessage(msg.text, msg.id)}
+                        aria-label="Unduh"
+                      >
+                        <FontAwesomeIcon icon={faDownload} />
+                        <span className="action-tooltip">Download</span>
+                      </button>
                     </div>
                   )}
                 </div>
+                {msg.sender === "user" && <div className="message-avatar user-avatar">👤</div>}
               </div>
-            </div>
+            ))
+          )}
 
-          ))}
           {isLoading && (
             <div className="message bot">
               <div className="message-content">
@@ -567,32 +382,48 @@ Silakan ketik pertanyaan Anda.`,
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Container */}
-        <div className="input-container">
+        {/* SCROLL-TO-BOTTOM BUTTON (above input, outside input wrapper) */}
+        {showScrollDown && (
+          <button
+            className="scroll-down-btn scroll-down-btn-above-input"
+            onClick={scrollToBottom}
+            aria-label="Scroll ke bawah"
+          >
+            <FontAwesomeIcon icon={faArrowDown} />
+          </button>
+        )}
+
+        {/* INPUT */}
+        <div className="chat-input-section">
           <div className="input-wrapper">
             <textarea
               ref={inputRef}
               value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              className="message-input"
-              rows="1"
+              rows={1}
+              onChange={(e) => {
+                setInputMessage(e.target.value)
+                resizeInput()
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
+              placeholder="Tanya sesuatu..."
+              className="chat-input"
+              disabled={isLoading}
             />
-            <button onClick={() => sendMessage()} disabled={!inputMessage.trim() || isLoading} className="send-button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor" />
-              </svg>
+            <button onClick={sendMessage} disabled={isLoading || !inputMessage.trim()} className="send-btn">
+              <FontAwesomeIcon icon={faPaperPlane} />
             </button>
           </div>
-          <div className="input-footer">
-            <span className="footer-text">&copy;HIMASIF 2025</span>
-          </div>
         </div>
-      </main>
+      </div>
+
+      
     </div>
   )
 }

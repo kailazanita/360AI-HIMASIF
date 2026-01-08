@@ -43,7 +43,7 @@ CORS(app, resources={
 # Mengambil API Key dari variabel lingkungan
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-MODEL_NAME = "deepseek/deepseek-r1-distill-llama-70b:free"
+MODEL_NAME = "deepseek/deepseek-chat"
 SITE_URL = os.getenv("SITE_URL", "http://localhost:5000")
 SITE_NAME = os.getenv("SITE_NAME", "HIMASIF AI Assistant")
 TIMEOUT = 30
@@ -304,7 +304,13 @@ def chat():
             logger.warning("OpenRouter API key not configured, using fallback response")
             fallback_response = simple_himasif_response(user_prompt)
             formatted_response = format_response(fallback_response)
-            return jsonify({"response": formatted_response})
+            # Tambahkan suggestions statis untuk demo
+            suggestions = [
+                "Apa visi HIMASIF?",
+                "Siapa ketua HIMASIF?",
+                "Kegiatan apa saja di HIMASIF?"
+            ]
+            return jsonify({"response": formatted_response, "suggestions": suggestions})
 
         # Get system prompt with data
         system_prompt = get_system_prompt()
@@ -353,7 +359,13 @@ def chat():
                     ai_response = result['choices'][0]['message']['content']
                     formatted_response = format_response(ai_response)
                     logger.info(f"AI response (formatted): {formatted_response[:100]}...")
-                    return jsonify({"response": formatted_response})
+                    # Tambahkan suggestions dinamis (atau statis jika belum ada logic AI)
+                    suggestions = [
+                        "Apa visi HIMASIF?",
+                        "Siapa ketua HIMASIF?",
+                        "Kegiatan apa saja di HIMASIF?"
+                    ]
+                    return jsonify({"response": formatted_response, "suggestions": suggestions})
                 else:
                     logger.error(f"No choices in OpenRouter response: {result}")
                     return jsonify({"response": "Maaf, terjadi kesalahan dalam memproses respons AI."})

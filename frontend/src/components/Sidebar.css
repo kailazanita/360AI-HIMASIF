@@ -1,0 +1,521 @@
+/* Sidebar styles */
+
+.mobile-drawer-backdrop,
+.mobile-drawer {
+  display: none;
+}
+
+.chat-sidebar {
+  width: 78px;
+  background: #0b0b0b;
+  border-right: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: visible;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 50;
+}
+
+.sidebar-top {
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 38px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sidebar-logo img {
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: none;
+  background: transparent;
+}
+
+.new-chat-btn {
+  margin: 36px 0 6px;
+  padding: 0;
+  background: #06a89d;
+  border: none;
+  color: #0b0b0b;
+  border-radius: 50% !important;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 1.35rem;
+  width: 40px;
+  height: 40px;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  align-self: center;
+  position: relative;
+}
+
+.new-chat-btn:hover {
+  background: #20d9d9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(6, 168, 157, 0.4);
+}
+
+.new-chat-tooltip {
+  position: absolute;
+  left: 50%;
+  top: 115%;
+  transform: translate(-50%, 6px);
+  background: #111;
+  color: #f0f9f8;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.62rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.new-chat-btn:hover .new-chat-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.menu-item {
+  width: 100%;
+  text-align: center;
+  padding: 8px 4px;
+  background: none !important;
+  border: none !important;
+  box-shadow: none;
+  color: #b5c9c7;
+  border-radius: 10px;
+  cursor: pointer !important;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 1;
+}
+
+.menu-item:hover {
+  background: none !important;
+  border: none !important;
+  box-shadow: none;
+  color: #20d9d9;
+}
+
+.menu-item:hover .menu-icon {
+  color: #20d9d9;
+  text-shadow: 0 0 8px #20d9d9, 0 0 18px #20d9d9;
+}
+
+.menu-item:disabled {
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+.menu-icon {
+  font-size: 1.1rem;
+  color: #f0f9f8;
+  line-height: 1;
+}
+
+.menu-label {
+  display: block;
+  font-size: 0.65rem;
+  color: #b5c9c7;
+  line-height: 1.1;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 10px;
+  border-top: 1px solid #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #0b0b0b;
+}
+
+.user-chip {
+  display: none;
+}
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sign-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.sign-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sign-btn:hover {
+  transform: translateY(-1px);
+}
+
+.sign-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #06a89d;
+  color: #0b0b0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 6px 14px rgba(6, 168, 157, 0.35);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sign-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 6px 14px rgba(6, 168, 157, 0.35);
+}
+
+.sign-btn:hover .sign-icon {
+  background: #20d9d9;
+  box-shadow: 0 8px 18px rgba(32, 217, 217, 0.35);
+}
+
+.sign-label {
+  display: block;
+  font-size: 0.65rem;
+  color: #b5c9c7;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.account-dropdown {
+  position: absolute;
+  left: 110%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #111;
+  border: 1px solid #132726;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 9999;
+  margin-top: 0;
+}
+
+.compact-dropdown {
+  min-width: 100px;
+  padding: 2px 4px;
+  font-size: 0.92rem;
+}
+.compact-dropdown .dropdown-item {
+  padding: 7px 10px;
+  font-size: 0.95em;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: #e8fbf9;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #12211f;
+  color: #20d9d9;
+}
+
+/* Mobile drawer styles - only active on small screens */
+@media (max-width: 768px) {
+  .mobile-drawer-backdrop {
+    display: none;
+  }
+
+  .mobile-drawer {
+    display: none;
+  }
+
+  .mobile-drawer-backdrop.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 950;
+    transition: opacity 0.26s ease;
+  }
+
+  .mobile-drawer {
+    display: flex; /* make container a flex column so inner can stretch */
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50%;
+    max-width: 420px;
+    /* Slightly lighter dark-gray gradient (less black) for mobile drawer */
+    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+    transform: translateX(-110%);
+    transition: transform 0.28s cubic-bezier(.2,.9,.2,1);
+    z-index: 1000;
+    box-shadow: 6px 0 30px rgba(0,0,0,0.6);
+    overflow: hidden; /* delegate scrolling to inner */
+  }
+
+  .mobile-drawer.open {
+    transform: translateX(0);
+    display: block;
+  }
+
+  .mobile-drawer-inner {
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    flex: 1 1 auto; /* allow inner to stretch to full height */
+    overflow: auto; /* enable scrolling inside inner area */
+    box-sizing: border-box;
+    /* reserve space for the absolute-positioned sign block */
+    padding-bottom: 140px;
+  }
+
+  /* align header padding with content gutter so logo and menu items line up */
+  .mobile-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 12px; /* match inner horizontal gutter */
+  }
+
+  /* close button removed (desktop keeps existing sidebar controls) */
+
+  .mobile-drawer-logo {
+    display: flex;
+    flex-direction: column; /* stack logo and button vertically */
+    align-items: center; /* center items horizontally */
+    justify-content: flex-start;
+    gap: 18px; /* increased vertical spacing */
+    margin: 0;
+    width: 100%;
+  }
+
+  .mobile-drawer-logo .mobile-logo-text {
+    font-family: 'Unbounded', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    font-weight: 800;
+    font-size: 1.6rem; /* increased size */
+    letter-spacing: -0.02em;
+    display: inline-block;
+    /* animated gradient text: tosca → blue */
+    background: linear-gradient(90deg, #06a89d 0%, #3b82f6 100%);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: gradientShift 5s linear infinite;
+  }
+
+  .mobile-new-chat-btn {
+    margin-top: 0; /* spacing controlled by container gap */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: calc(100% - 0px);
+    background: linear-gradient(135deg, #06a89d, #0d9b90);
+    color: #071010;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-family: 'FKGrotesk', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(6,168,157,0.14);
+    justify-content: center;
+  }
+
+  .mobile-new-chat-btn .mobile-new-chat-plus {
+    display: inline-block;
+    font-size: 1.6rem; /* larger plus */
+    line-height: 1;
+    font-weight: 900;
+    color: #ffffff; /* plus icon white */
+  }
+
+  .mobile-new-chat-btn .mobile-new-chat-label {
+    display: inline-block;
+    font-size: 0.98rem;
+    color: #ffffff; /* label white */
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .mobile-drawer-menu {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto; /* allow menu to grow so sign block can sit at bottom */
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  /* Make menu items horizontal in the mobile drawer: icon left, label right */
+  .mobile-drawer .menu-item {
+    flex-direction: row;
+    text-align: left;
+    /* remove left padding so items align with header logo (inner padding provides gutter) */
+    padding: 14px 12px 14px 0;
+    border-radius: 10px;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .mobile-drawer .menu-item:hover {
+    background: rgba(32,217,217,0.06);
+    color: #20d9d9;
+  }
+
+  .mobile-drawer .menu-icon {
+    font-size: 1.45rem;
+    width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #f0f9f8;
+    text-shadow: none;
+  }
+
+  .mobile-drawer .menu-label {
+    display: inline-block;
+    font-size: 1.08rem;
+    color: #e8fbf9;
+    white-space: nowrap;
+  }
+
+  .mobile-drawer .menu-item {
+    padding: 14px 14px;
+  }
+
+  /* pin the sign block to the absolute bottom of the drawer for guaranteed placement */
+  .mobile-drawer-sign {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 12px 0 12px;
+    border-top: 1px solid rgba(255,255,255,0.03);
+    background: transparent;
+  }
+
+  .mobile-sign-in {
+    background: #06a89d; /* tosca */
+    color: #071010;
+    border: none;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(6,168,157,0.16);
+  }
+
+  .mobile-sign-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* center contents horizontally */
+    gap: 0;
+    width: 100%; /* full width so avatar centers within drawer */
+    cursor: pointer;
+  }
+
+  .mobile-sign-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    object-fit: cover;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+    display: block;
+    margin: 0 auto; /* ensure avatar sits centered inside the button */
+  }
+
+  .mobile-sign-out {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #e8fbf9;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* hide desktop sidebar while mobile drawer exists */
+  .chat-sidebar {
+    display: none;
+  }
+}
