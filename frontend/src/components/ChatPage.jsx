@@ -111,7 +111,9 @@ function ChatPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/chat", {
+      const backendBase = import.meta.env.VITE_BACKEND_URL || ''
+      const url = backendBase ? `${backendBase.replace(/\/$/, '')}/chat` : '/chat'
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed }),
