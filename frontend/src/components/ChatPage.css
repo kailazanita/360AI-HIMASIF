@@ -8,7 +8,7 @@
   margin: 0 auto 0.5rem auto;
   background: rgba(32, 217, 217, 0.13);
   color: var(--primary);
-  border: none;re
+  border: none;
   border-radius: 50%;
   width: 28px;
   height: 28px;
@@ -204,9 +204,9 @@
 .new-chat-btn {
   margin: 0.25rem 0 0.5rem;
   padding: 0.9rem 1rem;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #06a89d, #0d9b90); /* tosca */
   border: none;
-  color: #0b0b0b;
+  color: #ffffff;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
@@ -219,9 +219,9 @@
 }
 
 .new-chat-btn:hover {
-  background: #60a5fa;
+  background: linear-gradient(135deg, #0d9b90, #06a89d);
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(59,130,246,0.28);
+  box-shadow: 0 6px 14px rgba(6,168,157,0.28);
 }
 
 .conversations-list {
@@ -879,7 +879,7 @@
   border-radius: 12px;
   padding: 0.5rem;
   transition: all 0.3s ease;
-  align-items: flex-end;
+  align-items: center; /* center vertically on desktop so send button doesn't overflow */
 }
 
 .input-wrapper:focus-within {
@@ -917,11 +917,12 @@
   background: linear-gradient(135deg, #06a89d, #0d9b90);
   border: none;
   color: white;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.9rem;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .send-btn:hover:not(:disabled) {
@@ -1051,6 +1052,91 @@
   /* Account for fixed mobile header height so messages aren't covered */
   .chat-main {
     padding-top: 56px; /* matches .mobile-header height */
+  }
+
+  /* Make the chat input sticky at the bottom on mobile */
+  .chat-input-section {
+    /* Allow the chat input container to expand vertically (grows upward) */
+    --chat-input-min: 64px;
+    --chat-input-max: 40vh; /* maximum growth relative to viewport */
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: var(--chat-input-min);
+    max-height: var(--chat-input-max);
+    z-index: 220;
+    display: flex;
+    align-items: flex-end; /* anchor children to bottom so textarea grows upward */
+    justify-content: center;
+    padding: 0.5rem calc(0.8rem + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(11,11,11,0.92), rgba(11,11,11,0.99));
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -8px 20px rgba(0,0,0,0.5);
+  }
+
+  /* Reserve space so messages aren't hidden behind the (potentially tall) input */
+  .messages-container {
+    padding-bottom: calc(40vh + 28px); /* fallback max space to avoid overlap */
+  }
+
+  /* Let input wrapper size naturally; textarea will be height-controlled via JS */
+  .input-wrapper {
+    height: auto;
+    align-items: flex-end; /* ensure textarea grows upward from bottom */
+    position: relative; /* for absolutely positioned send button */
+    /* reserve space on the right for the floating send button */
+    padding-right: calc(48px + 0.25rem);
+    min-height: 42px; /* ensure button fits vertically */
+  }
+
+  .chat-input {
+    max-height: calc(40vh - 24px); /* prevent textarea from exceeding visual max */
+    overflow-y: auto;
+    /* prevent typed text from going under the send button */
+    padding-right: calc(56px + 0.75rem);
+  }
+
+  /* float the send button inside the input wrapper so it stays bottom-right */
+  .input-wrapper .send-btn {
+    position: absolute;
+    right: 8px;
+    bottom: 10px;
+    z-index: 5;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+  }
+
+  /* When the textarea is small, vertically center the send button inside the wrapper */
+  .input-wrapper.small-input .send-btn {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+
+  /* Give small-input wrappers a bit more vertical padding so the button doesn't overflow */
+  .input-wrapper.small-input {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  /* Ensure textarea respects padding and never flows under the send button */
+  .input-wrapper .chat-input {
+    box-sizing: border-box;
+    width: 100%;
+    /* tighten padding so textarea has more horizontal room while avoiding overlap */
+    padding-right: calc(48px + 0.25rem);
+    max-width: calc(100% - 48px);
+  }
+
+  /* For very small single-line inputs, keep slightly larger right padding */
+  .input-wrapper.small-input .chat-input {
+    padding-right: calc(48px + 0.5rem);
+  }
+
+  /* Place scroll-to-bottom button above the sticky input */
+  .scroll-down-btn-above-input {
+    margin-bottom: calc(var(--chat-input-height) + 12px);
   }
 
   .message-content {

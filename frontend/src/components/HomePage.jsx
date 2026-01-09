@@ -13,6 +13,7 @@ import {
   faCalendarDays,
   faFolderOpen,
   faAddressBook,
+  faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons"
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons"
 import { signInWithPopup } from "firebase/auth"
@@ -20,6 +21,7 @@ import { auth, googleProvider } from "../lib/firebase"
 import Sidebar from "./Sidebar"
 import Header from "./Header"
 import "./HomePage.css"
+import "./ChatPage.css"
 
 function HomePage() {
   const [query, setQuery] = useState("")
@@ -70,7 +72,17 @@ function HomePage() {
     if (!el) return
     requestAnimationFrame(() => {
       el.style.height = "auto"
-      const max = window.innerHeight * 0.5
+      // Limit height to the search container height so it doesn't overlap footer
+      let max = window.innerHeight * 0.5
+      try {
+        const parent = el.closest('.search-container')
+        if (parent) {
+          // leave a small padding so textarea stays within the container
+          max = Math.max(40, parent.clientHeight - 12)
+        }
+      } catch (e) {
+        // fallback to viewport-based max
+      }
       const newH = Math.min(el.scrollHeight, max)
       el.style.height = `${newH}px`
     })
@@ -117,21 +129,26 @@ function HomePage() {
             </h2>
             <p className="hero-subtitle hero-tagline">selalu aktif, siap membantu</p>
             <div className="search-container">
-              <div className="search-input-wrapper">
+              <div className="input-wrapper">
                 <textarea
                   ref={inputRef}
                   value={query}
+                  rows={1}
                   onChange={(e) => {
                     setQuery(e.target.value)
                     requestAnimationFrame(adjustHeight)
                   }}
-                  onKeyDown={handleKeyDown}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSearch()
+                    }
+                  }}
                   placeholder="Cari informasi apapun.."
-                  className="search-input"
-                  rows={1}
+                  className="chat-input"
                 />
-                <button onClick={handleSearch} disabled={isLoading} className="search-btn">
-                  {isLoading ? "Mencari..." : <FontAwesomeIcon icon={faArrowRight} />}
+                <button onClick={handleSearch} disabled={isLoading || !query.trim()} className="send-btn">
+                  <FontAwesomeIcon icon={faPaperPlane} />
                 </button>
               </div>
             </div>

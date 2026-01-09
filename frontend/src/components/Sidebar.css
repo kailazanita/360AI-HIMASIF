@@ -372,11 +372,13 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: nowrap; /* prevent internal wrapping */
     width: calc(100% - 0px);
     background: linear-gradient(135deg, #06a89d, #0d9b90);
     color: #071010;
     border: none;
-    padding: 10px 12px;
+    /* responsive vertical + horizontal padding: vertical smaller, horizontal expands on wider phones */
+    padding: clamp(8px, 1.6vw, 12px) clamp(10px, 6vw, 20px);
     border-radius: 10px;
     font-family: 'FKGrotesk', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
     font-weight: 800;
@@ -397,10 +399,39 @@
 
   .mobile-new-chat-btn .mobile-new-chat-label {
     display: inline-block;
-    font-size: 0.98rem;
+    flex: 1 1 auto; /* allow label to take remaining space */
+    /* keep label on single line but use a smaller minimum so it fits */
+    font-size: clamp(0.7rem, 3.2vw, 1.02rem);
     color: #ffffff; /* label white */
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.03em;
+    white-space: nowrap; /* keep label on single line */
+    overflow: visible; /* ensure full text remains visible */
+    text-overflow: clip;
+    text-align: center;
+    padding: 0 6px;
+  }
+
+  /* Ensure the plus sign doesn't take too much space on very small screens */
+  .mobile-new-chat-btn .mobile-new-chat-plus {
+    flex: 0 0 auto;
+    margin-right: 6px;
+    font-size: clamp(1.1rem, 4.2vw, 1.6rem); /* scale down on narrow screens */
+  }
+
+  /* very small devices: reduce spacing and font to keep everything on one line */
+  @media (max-width: 360px) {
+    .mobile-new-chat-btn {
+      gap: 6px;
+      padding: clamp(6px, 2.2vw, 8px) clamp(8px, 4.5vw, 12px);
+    }
+    .mobile-new-chat-btn .mobile-new-chat-label {
+      font-size: clamp(0.65rem, 3.5vw, 0.95rem);
+      padding: 0 4px;
+    }
+    .mobile-new-chat-btn .mobile-new-chat-plus {
+      font-size: 1.25rem;
+    }
   }
 
   @keyframes gradientShift {
@@ -443,6 +474,9 @@
     justify-content: center;
     color: #f0f9f8;
     text-shadow: none;
+    /* responsive icon sizing */
+    font-size: clamp(1.1rem, 4.2vw, 1.6rem);
+    width: clamp(36px, 9vw, 44px);
   }
 
   .mobile-drawer .menu-label {
@@ -450,10 +484,30 @@
     font-size: 1.08rem;
     color: #e8fbf9;
     white-space: nowrap;
+    /* responsive label sizing and truncation prevention */
+    font-size: clamp(0.9rem, 3.6vw, 1.08rem);
+    overflow: visible;
+    text-overflow: clip;
   }
 
   .mobile-drawer .menu-item {
-    padding: 14px 14px;
+    padding: clamp(10px, 2.8vw, 14px) clamp(12px, 4.5vw, 18px);
+  }
+
+  /* Tighten layout on very narrow screens but keep labels visible */
+  @media (max-width: 360px) {
+    .mobile-drawer .menu-icon {
+      font-size: clamp(1rem, 4.8vw, 1.25rem);
+      width: clamp(32px, 10vw, 40px);
+    }
+    .mobile-drawer .menu-label {
+      font-size: clamp(0.78rem, 3.8vw, 0.98rem);
+      white-space: nowrap;
+    }
+    .mobile-drawer .menu-item {
+      padding: clamp(8px, 2.6vw, 12px) clamp(8px, 4vw, 12px);
+      gap: 8px;
+    }
   }
 
   /* pin the sign block to the absolute bottom of the drawer for guaranteed placement */

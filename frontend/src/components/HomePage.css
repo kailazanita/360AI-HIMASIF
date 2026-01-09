@@ -535,25 +535,84 @@ body, html {
   }
 
   .home-hero {
-    padding: 6rem 1.5rem 2rem;
+    padding: 4rem 1.5rem 1rem;
     align-items: center;
   }
 
   /* position the search just above the footer on mobile (fixed to viewport) */
   .search-container {
+    --footer-height: clamp(44px, 8vh, 64px);
+    --search-height: clamp(56px, 9vh, 96px);
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 72px; /* sits above the footer bar */
+    bottom: calc(var(--footer-height) + 10px); /* sits above the footer bar */
     width: calc(100% - 32px);
     max-width: 720px;
     margin: 0 auto;
-    z-index: 60;
+    z-index: 220;
+    height: var(--search-height);
+    display: flex;
+    align-items: flex-end; /* anchor children to bottom so textarea grows upward */
+    justify-content: center;
   }
 
   /* reserve space at the bottom so hero text doesn't get overlapped */
   .home-main {
-    padding-bottom: 180px;
+    padding-bottom: calc(var(--footer-height, 56px) + var(--search-height, 72px) + 16px);
+  }
+
+  /* Compact, adaptive footer for mobile: keep desktop footer unchanged */
+  .home-footer-bar {
+    --footer-height: clamp(44px, 7vh, 64px);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--footer-height);
+    min-height: 40px;
+    padding: clamp(6px, 1.6vw, 12px) 1rem;
+    padding-bottom: calc(clamp(6px, 1.6vw, 12px) + env(safe-area-inset-bottom));
+    background: rgba(11, 11, 11, 0.55);
+    backdrop-filter: blur(6px);
+    z-index: 90;
+  }
+
+  .home-footnote,
+  .home-footer-socials {
+    position: static;
+    top: auto;
+    transform: none;
+  }
+
+  .home-footnote {
+    margin-left: 0.5rem;
+    color: rgba(240, 249, 248, 0.85);
+    /* make footer text scale down on smaller screens (smaller minimum) */
+    font-size: clamp(0.6rem, 2.6vw, 0.88rem);
+    line-height: 1;
+    pointer-events: auto;
+  }
+
+  .home-footer-socials {
+    margin-right: 0.5rem;
+    gap: clamp(8px, 2.4vw, 14px);
+  }
+
+  /* parent font-size to ensure all footer text scales together (won't change widths) */
+  .home-footer-bar {
+    font-size: clamp(0.62rem, 2.2vw, 0.95rem);
+  }
+
+  .home-footer .footer-content {
+    font-size: clamp(0.62rem, 2.4vw, 0.95rem);
+  }
+
+  .footer-links a {
+    font-size: clamp(0.58rem, 2.6vw, 1rem);
   }
 
   .hero-title {
@@ -569,10 +628,46 @@ body, html {
     flex-direction: column;
     max-width: 720px;
     width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
   }
 
   .search-btn {
     width: 100%;
+  }
+
+  .search-input {
+    /* keep the textarea small when sticky, allow scrolling if content grows */
+    max-height: calc(var(--search-height, 72px) - 12px);
+    overflow-y: auto;
+  }
+
+  /* Mobile size tweaks: slightly smaller paddings and fonts for better fit */
+  .search-input {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+  }
+
+  .search-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+
+  .home-footer-bar {
+    min-height: 42px;
+  }
+
+  .home-footnote {
+    /* responsive footer text: scales with viewport width but stays within readable bounds */
+    font-size: clamp(0.7rem, 2.6vw, 0.85rem);
+  }
+
+  .footer-social-link svg {
+    width: clamp(14px, 1.6vw, 18px);
+    height: clamp(14px, 1.6vw, 18px);
   }
 
   /* Hide the 'Coba pertanyaan ini' card area on mobile without affecting desktop */
@@ -645,18 +740,23 @@ body, html {
   }
 
   .search-container {
+    --search-height: clamp(52px, 10vh, 88px);
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 68px;
+    bottom: calc(var(--footer-height, 56px) + 8px);
     width: calc(100% - 24px);
     max-width: 640px;
     margin: 0 auto;
-    z-index: 60;
+    z-index: 220;
+    height: var(--search-height);
+    display: flex;
+    align-items: flex-end; /* anchor to bottom */
+    justify-content: center;
   }
 
   .home-main {
-    padding-bottom: 160px;
+    padding-bottom: calc(var(--footer-height, 56px) + var(--search-height, 64px) + 12px);
   }
 
   .features-section {
@@ -670,6 +770,32 @@ body, html {
   .home-footer {
     padding: 2rem 1rem;
     font-size: 0.85rem;
+  }
+
+  /* tweak the footer-bar specifically for very small screens */
+  .home-footer-bar {
+    padding: 0.4rem 0.8rem;
+    padding-bottom: calc(0.4rem + env(safe-area-inset-bottom));
+    min-height: 40px;
+  }
+
+  /* Extra small screen adjustments */
+  .search-input {
+    padding: 0.55rem;
+    font-size: 0.92rem;
+    min-height: 40px;
+    max-height: calc(var(--search-height, 64px) - 12px);
+    overflow-y: auto;
+  }
+
+  .search-btn {
+    padding: 0.55rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-social-link svg {
+    width: clamp(12px, 2.2vw, 16px);
+    height: clamp(12px, 2.2vw, 16px);
   }
 
   .footer-links {

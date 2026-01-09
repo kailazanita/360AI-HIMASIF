@@ -49,8 +49,41 @@ function ChatPage() {
     if (!inputRef.current) return
     const el = inputRef.current
     el.style.height = "auto"
-    const nextHeight = Math.min(el.scrollHeight, 220)
+    // Default max height (desktop fallback)
+    const viewportMax = Math.floor(window.innerHeight * 0.4) // 40vh
+    let max = 220
+    try {
+      // allow textarea to grow up to viewportMax on mobile
+      max = viewportMax
+    } catch (e) {
+      max = 220
+    }
+
+    const nextHeight = Math.min(el.scrollHeight, max)
     el.style.height = `${nextHeight}px`
+
+    // expand the parent container (.chat-input-section) to fit the textarea
+    try {
+      const parent = el.closest('.chat-input-section')
+      const wrapper = el.closest('.input-wrapper')
+      if (parent) {
+        // add small padding for wrapper + controls
+        parent.style.height = `${nextHeight + 24}px`
+      }
+      // toggle a class on the input wrapper when the textarea is small
+      if (wrapper) {
+        const smallThreshold = 56 // single-line-ish threshold
+        if (nextHeight <= smallThreshold) wrapper.classList.add('small-input')
+        else wrapper.classList.remove('small-input')
+      }
+      // ensure messages container has enough bottom padding so content isn't covered
+      if (messageContainerRef.current) {
+        messageContainerRef.current.style.paddingBottom = `${(parent ? parent.clientHeight : viewportMax) + 28}px`
+        messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   const handleLogoClick = () => navigate("/")
