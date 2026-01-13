@@ -160,6 +160,65 @@ def format_response(text):
 
     return text
 
+# Function to handle specific HIMASIF leadership questions
+def get_leadership_info(question):
+    """Handle questions about HIMASIF leadership without showing NIM"""
+    question_lower = question.lower()
+    
+    if any(keyword in question_lower for keyword in ['ketua', 'ketua umum', 'ketua himasif']):
+        return """**Ketua HIMASIF saat ini adalah:**
+
+• **Nama**: Mutiara Fitria Azzahra
+• **Jabatan**: Ketua HIMASIF
+
+**Wakil Ketua HIMASIF adalah:**
+
+• **Nama**: Muhammad Rivaldo Firdaus
+• **Jabatan**: Wakil Ketua HIMASIF
+
+Keduanya memimpin Badan Pengurus Harian (BPH) HIMASIF periode ini dan bertanggung jawab atas seluruh aktivitas organisasi. 💼"""
+
+    elif any(keyword in question_lower for keyword in ['sekretaris']):
+        return """**Sekretaris HIMASIF:**
+
+**Sekretaris I:**
+• **Nama**: Mada Kaila Mulya
+• **Jabatan**: Sekretaris I
+
+**Sekretaris II:**
+• **Nama**: Serena Mariana Lalang Puling
+• **Jabatan**: Sekretaris II
+
+Mereka bertugas mengelola administrasi dan dokumentasi kegiatan HIMASIF. 📝"""
+
+    elif any(keyword in question_lower for keyword in ['bendahara']):
+        return """**Bendahara HIMASIF:**
+
+**Bendahara I:**
+• **Nama**: Yohana Citra Simamora
+• **Jabatan**: Bendahara I
+
+**Bendahara II:**
+• **Nama**: Andi Muhammad Nauval R.
+• **Jabatan**: Bendahara II
+
+Mereka bertanggung jawab atas pengelolaan keuangan dan administrasi anggaran HIMASIF. 💰"""
+
+    elif any(keyword in question_lower for keyword in ['bph', 'pengurus harian']):
+        return """**Badan Pengurus Harian (BPH) HIMASIF:**
+
+🏛️ **Struktur Kepemimpinan:**
+• **Ketua**: Mutiara Fitria Azzahra
+• **Wakil Ketua**: Muhammad Rivaldo Firdaus
+• **Sekretaris I**: Mada Kaila Mulya
+• **Sekretaris II**: Serena Mariana Lalang Puling
+• **Bendahara I**: Yohana Citra Simamora
+• **Bendahara II**: Andi Muhammad Nauval R.
+
+BPH adalah badan yang bertugas untuk mengusung, membentuk, dan mengevaluasi terkait aktivitas atau program kerja HIMASIF. Mereka memimpin seluruh kegiatan organisasi dengan tagline **"We Make IT Happen"**! 🚀"""
+    
+    return None
+
 # Simple fallback AI for HIMASIF questions when API is not available
 def simple_himasif_response(question):
     question_lower = question.lower()
@@ -298,6 +357,17 @@ def chat():
 
         user_prompt = data["message"]
         logger.info(f"Received query: {user_prompt}")
+
+        # First check if this is a leadership question and handle it directly
+        leadership_response = get_leadership_info(user_prompt)
+        if leadership_response:
+            formatted_response = format_response(leadership_response)
+            suggestions = [
+                "Apa visi HIMASIF?",
+                "Siapa ketua HIMASIF?",
+                "Kegiatan apa saja di HIMASIF?"
+            ]
+            return jsonify({"response": formatted_response, "suggestions": suggestions})
 
         # Check if API key is configured
         if not OPENROUTER_API_KEY:

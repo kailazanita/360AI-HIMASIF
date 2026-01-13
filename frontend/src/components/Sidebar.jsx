@@ -81,9 +81,7 @@ function Sidebar({ onNewChat, navItems, onSignIn, onSignOut, onLogoClick, user }
                 onClick={() => {
                   setMobileOpen(false)
                   if (item.label === "Beranda") window.location.href = "/";
-                  else if (item.label === "Agenda") window.location.href = "/agenda";
                   else if (item.label === "Dokumen") window.location.href = "/dokumen";
-                  else if (item.label === "Kontak") window.location.href = "/kontak";
                 }}
               >
                 <span className="menu-icon">
@@ -136,9 +134,7 @@ function Sidebar({ onNewChat, navItems, onSignIn, onSignOut, onLogoClick, user }
                 className="menu-item"
                 onClick={() => {
                   if (item.label === "Beranda") window.location.href = "/";
-                  else if (item.label === "Agenda") window.location.href = "/agenda";
                   else if (item.label === "Dokumen") window.location.href = "/dokumen";
-                  else if (item.label === "Kontak") window.location.href = "/kontak";
                 }}
               >
                 <span className="menu-icon">

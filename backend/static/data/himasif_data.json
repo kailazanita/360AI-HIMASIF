@@ -25,13 +25,13 @@
   "lecturers": [
     {
       "id": 1,
-      "name": "Ir. Yudi Samyudia, Ph.D.",
-      "position": "Rector / Lecturer"
+      "name": "Dr. Cahyono Budy Santoso, ST, MMSI",
+      "position": "Head of the Department of Information Systems / Lecturer"
     },
     {
       "id": 2,
       "name": "Yunus Widjaja, S.Kom, MM",
-      "position": "Head of the Education Bureau / Lecturer"
+      "position": "Secretary / Lecturer"
     },
     {
       "id": 3,
@@ -41,7 +41,7 @@
     {
       "id": 4,
       "name": "Johannes Hamonangan Siregar., Drs, M.Ed, Ph.D.",
-      "position": "Scientific and Curriculum Coordinator / Lecturer"
+      "position": "Lecturer"
     },
     {
       "id": 5,
@@ -51,12 +51,12 @@
     {
       "id": 6,
       "name": "Dr. Rufman Iman Akbar., MM., MKom., IPU., Asean ENG",
-      "position": "Lecturer"
+      "position": "Scientific and Curriculum Coordinator / Lecturer"
     },
     {
       "id": 7,
       "name": "Chaerul Anwar, S.Kom, M.T.I",
-      "position": "Head of the Department of Information Systems / Lecturer"
+      "position": "Lecturer"
     },
     {
       "id": 8,
@@ -67,11 +67,6 @@
       "id": 9,
       "name": "Dr. Safrizal",
       "position": "Information Systems Research Laboratory Coordinator / Lecturer"
-    },
-    {
-      "id": 10,
-      "name": "Dr. Cahyono Budy Santoso, ST, MMSI",
-      "position": "Lecturer"
     }
   ],
   "leadership": {

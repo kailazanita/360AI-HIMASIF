@@ -32,9 +32,7 @@ function HomePage() {
 
   const navItems = [
     { label: "Beranda", icon: faHouse },
-    { label: "Agenda", icon: faCalendarDays },
     { label: "Dokumen", icon: faFolderOpen },
-    { label: "Kontak", icon: faAddressBook },
   ]
 
   const handleLogoClick = () => navigate("/")
