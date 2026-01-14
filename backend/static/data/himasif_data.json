@@ -104,9 +104,9 @@
           "name": "Advokasi",
           "fullName": "Advokasi",
           "description": "Divisi Advokasi adalah divisi yang bertanggung jawab untuk menghimpun dan menampung aspirasi setiap anggota Himpunan Mahasiswa Sistem Informasi (HIMASIF) dalam mencapai kesejahteraan mahasiswa.",
-          "head": {"id": 9, "name": "Deryl Timothy Hasiholan P.", "position": "Kepala Divisi Advokasi", "nim": "2024081009"},
+          "head": {"id": 9, "name": "Jhon Calvin", "position": "Kepala Divisi Advokasi", "nim": "2023081047"},
           "members": [
-            {"id": 10, "name": "Jhon Calvin", "position": "Anggota Divisi Advokasi", "nim": "2023081047"},
+            {"id": 10, "name": "Deryl Timothy Hasiholan P.", "position": "Anggota Divisi Advokasi", "nim": "2024081009"},
             {"id": 11, "name": "Clara Marcelia Farandrian", "position": "Anggota Divisi Advokasi", "nim": "2024081053"},
             {"id": 12, "name": "Faiz Hibatullah", "position": "Anggota Divisi Advokasi", "nim": "2024081037"}
           ]

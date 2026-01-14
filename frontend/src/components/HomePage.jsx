@@ -32,7 +32,6 @@ function HomePage() {
 
   const navItems = [
     { label: "Beranda", icon: faHouse },
-    { label: "Dokumen", icon: faFolderOpen },
   ]
 
   const handleLogoClick = () => navigate("/")

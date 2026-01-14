@@ -37,7 +37,6 @@ function ChatPage() {
 
   const navItems = [
     { label: "Beranda", icon: faHouse },
-    { label: "Dokumen", icon: faFolderOpen },
   ]
 
   const inputRef = useRef(null)
